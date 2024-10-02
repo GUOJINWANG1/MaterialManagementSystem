@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1.2fr 2.8fr;
+            gap: 20px;
+            width: 90%;
+            margin: 20px auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            grid-column: span 2;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, select {
+            padding: 10px;
+            width: 100%;
+            height: 40px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            cursor: pointer;
+            background-color: #f4f4f9;
+        }
+
+        .expired {
+            background-color: red;
+            color: white;
+        }
+
+        .expiring-soon {
+            background-color: yellow;
+        }
+
+        .actions button {
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .actions button:hover {
+            background-color: #0056b3;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .product-list {
+            overflow-y: auto;
+            height: calc(100vh - 60px);
+        }
+
+        .multi-select-checkbox {
+            margin-right: 5px;
+        }
+
+        .confirmation {
+            display: none;
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Material Management System</h2>
+
+        <form id="productForm">
+            <label for="scanQR">Scan QR Code:</label>
+            <input type="text" id="scanQR" placeholder="Scan QR Code here..." oninput="handleQRInput()">
+
+            <label for="productID">Product ID (Required):</label>
+            <input type="text" id="productID" required>
+
+            <label for="productType">Product Type (Required):</label>
+            <input type="text" id="productType" required>
+
+            <label for="quantity">Quantity (1-20000, Required):</label>
+            <input type="number" id="quantity" min="1" max="20000" required>
+
+            <label for="expiration">Expiration Time (MM/DD/YYYY, Required):</label>
+            <input type="text" id="expiration" placeholder="MM/DD/YYYY" required>
+
+            <label for="username">Username (Optional):</label>
+            <input type="text" id="username">
+
+            <label for="location">Location (Optional):</label>
+            <input type="text" id="location">
+
+            <button type="button" onclick="addProduct()">Add Product</button>
+        </form>
+
+        <div class="product-list">
+            <table id="productList">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+                        <th onclick="sortTable(1)">Product ID &#9650;&#9660;</th>
+                        <th onclick="sortTable(2)">Product Type &#9650;&#9660;</th>
+                        <th onclick="sortTable(3)">Quantity &#9650;&#9660;</th>
+                        <th onclick="sortTable(4)">Expiration Time &#9650;&#9660;</th>
+                        <th>Username</th>
+                        <th>Location</th>
+                        <th>Added Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Product rows will be added here -->
+                </tbody>
+            </table>
+        </div>
+
+        <button type="button" onclick="deleteSelectedProducts()">Delete Selected Products</button>
+    </div>
+
+    <div class="confirmation" id="confirmation">
+        <p>Are you sure you want to proceed?</p>
+        <button onclick="confirmAction()">Yes</button>
+        <button onclick="cancelAction()">No</button>
+    </div>
+
+    <script>
+        const products = [];
+
+        function handleQRInput() {
+            const qrData = document.getElementById("scanQR").value;
+            const parsedData = parseQRCode(qrData);
+
+            document.getElementById("productID").value = parsedData.productID;
+            document.getElementById("productType").value = parsedData.productType;
+            document.getElementById("quantity").value = parsedData.quantity;
+            document.getElementById("expiration").value = parsedData.expiration;
+        }
+
+        function parseQRCode(qrData) {
+            const parts = qrData.split('|');
+            const productType = parts[0].substring(1);
+            const productID = parts[4].substring(1);
+            const quantity = parts[3].match(/\d{4,5}/)[0];
+            const expiration = formatDate(parts[6].substring(2));
+
+            return { productID, productType, quantity, expiration };
+        }
+
+        function formatDate(dateString) {
+            const year = dateString.substring(0, 4);
+            const month = dateString.substring(4, 6);
+            const day = dateString.substring(6, 8);
+            return `${month}/${day}/${year}`;
+        }
+
+        function addProduct() {
+            const productID = document.getElementById("productID").value;
+            const productType = document.getElementById("productType").value;
+            const quantity = document.getElementById("quantity").value;
+            const expiration = document.getElementById("expiration").value;
+            const username = document.getElementById("username").value;
+            const location = document.getElementById("location").value || "N/A";
+            const addedDate = new Date().toLocaleDateString();
+
+            // Validation for Product ID and Product Type
+            if (!productID || !productType) {
+                alert("Product ID and Product Type are required!");
+                return;
+            }
+
+            // Expiration date validation
+            const expirationDate = new Date(expiration);
+            const today = new Date();
+            const isValidDate = !isNaN(expirationDate.getTime());
+
+            if (!isValidDate) {
+                alert("Invalid expiration date format. Please use MM/DD/YYYY.");
+                return;
+            }
+
+            const product = {
+                productID,
+                productType,
+                quantity,
+                expiration,
+                username,
+                location,
+                addedDate
+            };
+
+            products.push(product);
+            updateProductList();
+
+            // Clear input fields after adding product
+            document.getElementById("scanQR").value = "";
+            document.getElementById("productID").value = "";
+            document.getElementById("productType").value = "";
+            document.getElementById("quantity").value = "";
+            document.getElementById("expiration").value = "";
+        }
+
+        function updateProductList() {
+            const tbody = document.querySelector("#productList tbody");
+            tbody.innerHTML = "";
+
+            const today = new Date().toISOString().split('T')[0];
+            const tenDaysFromNow = new Date();
+            tenDaysFromNow.setDate(tenDaysFromNow.getDate() + 10);
+            const tenDaysFromNowStr = tenDaysFromNow.toISOString().split('T')[0];
+
+            products.forEach((product, index) => {
+                const row = document.createElement("tr");
+                const expirationDate = new Date(product.expiration).toISOString().split('T')[0];
+                
+                if (expirationDate < today) {
+                    row.classList.add("expired");
+                } else if (expirationDate < tenDaysFromNowStr) {
+                    row.classList.add("expiring-soon");
+                }
+
+                row.innerHTML = `
+                    <td><input type="checkbox" class="multi-select-checkbox" data-index="${index}"></td>
+                    <td>${product.productID}</td>
+                    <td>${product.productType}</td>
+                    <td>${product.quantity}</td>
+                    <td>${product.expiration}</td>
+                    <td>${product.username}</td>
+                    <td>${product.location}</td>
+                    <td>${product.addedDate}</td>
+                    <td class="actions">
+                        <button onclick="editProduct(${index})">Edit</button>
+                        <button class="delete-btn" onclick="showConfirmation(${index})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function toggleSelectAll(selectAllCheckbox) {
+            const checkboxes = document.querySelectorAll(".multi-select-checkbox");
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        function showConfirmation(index) {
+            document.getElementById("confirmation").style.display = "block";
+            window.confirmDeleteIndex = index;
+        }
+
+        function confirmAction() {
+            const index = window.confirmDeleteIndex;
+            products.splice(index, 1);
+            updateProductList();
+            document.getElementById("confirmation").style.display = "none";
+        }
+
+        function cancelAction() {
+            document.getElementById("confirmation").style.display = "none";
+        }
+
+        function deleteSelectedProducts() {
+            const checkboxes = document.querySelectorAll(".multi-select-checkbox:checked");
+            checkboxes.forEach(checkbox => {
+                const index = checkbox.dataset.index;
+                products.splice(index, 100);
+            });
+            updateProductList();
+        }
+
+        function editProduct(index) {
+            const product = products[index];
+            document.getElementById("productID").value = product.productID;
+            document.getElementById("productType").value = product.productType;
+            document.getElementById("quantity").value = product.quantity;
+            document.getElementById("expiration").value = product.expiration;
+            document.getElementById("username").value = product.username;
+            document.getElementById("location").value = product.location;
+            products.splice(index, 1); // Remove the product from the list
+        }
+
+        function sortTable(columnIndex) {
+            const table = document.getElementById("productList");
+            const tbody = table.tBodies[0];
+            const rows = Array.from(tbody.rows);
+            const isAscending = table.dataset.sortOrder === 'asc';
+            table.dataset.sortOrder = isAscending ? 'desc' : 'asc';
+
+            rows.sort((a, b) => {
+                const aValue = a.cells[columnIndex].innerText;
+                const bValue = b.cells[columnIndex].innerText;
+
+                return isAscending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+</body>
+</html>
+
