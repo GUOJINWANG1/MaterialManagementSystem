@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Material Management System</title>
+    <title>QR Code Generator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,39 +14,27 @@
            margin-left:10px;
            width:100vw;
            height:80vh;           
-        
-            
-        }
-
-         .container {
+         }
+       .container {
       display: grid;
-            grid-template-columns: 1fr 80%;
+     grid-template-columns: 1fr 80%;
      width: 100%;
      height: 90vh;
      margin: 20px 0;
-     background-color: #f0f0f0;
+     background-color: white;
      border: 1px solid white;
       overflow: auto;  /* 超出宽度时可滚动 */
-   }
-
-           
-            
-            
-     
-
-        h2 {
+      }
+    h2 {
             text-align: center;
             color: #333;
             grid-column: span 2;
-           
-           
-        }
-
-        form {
+    }
+    form {
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
-            background-color: #fff;
+            background-color: white;
             padding: 20px;
             border: 1px solid #ddd;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
@@ -53,29 +42,19 @@
             height:800px;
             border: 1px solid #000;
              margin:0 auto;
-           
-            
-        }
-        
-
-        label {
+           }
+      label {
             font-weight: bold;
-            
-            
-        }
-
-        input, select {
+      }
+       input, select {
             padding: 10px;
             width: 100%;
             height: 30px;
             border: 1px solid #000;
             border-radius: 4px;
             grid-template-columns: 1fr 20% ;
-       
-            
-        }
-
-        button {
+    }
+   button {
             padding: 10px 10px;
             background-color: #333;
             color: white;
@@ -84,51 +63,36 @@
             cursor: pointer;
             width: 200px;
         }
-
-        button:hover {
+      button:hover {
             background-color: #218838;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: center;
-            
-            
-        }
-
+         }
         table, th, td {
             border: 1px solid #000;
              color: #000;
-            
-             
-             
-        }
-
-        th, td {
+      }
+       th, td {
             padding: 10px;
             text-align: centre;
-         
-        }
-
-        th {
+       }
+     th {
             cursor: pointer;
             background-color: #f4f4f9;
         }
-
-        .expired {
+       .expired {
             background-color: red;
             color: white;
         }
-
         .expiring-soon {
             background-color: yellow;
         }
-
         .valid {
             background-color: lightgreen;
         }
-
         .actions button {
             background-color: #007bff;
             color: white;
@@ -137,33 +101,26 @@
             border-radius: 4px;
              width:100px;
         }
-
-        .actions button:hover {
+       .actions button:hover {
             background-color: #0056b3;
             width:100px;
         }
-
-        .delete-btn {
+         .delete-btn {
             background-color: #dc3545;
             width:100px;
         }
-
-        .delete-btn:hover {
+       .delete-btn:hover {
             background-color: #990;
             width:100px;
         }
-
-        .product-list {
+         .product-list {
             overflow-y: auto;
             height: calc(100vh - 60px);
-            
-        }
-
-        .multi-select-checkbox {
+         }
+         .multi-select-checkbox {
             margin-right: 1;
              width:100px;
         }
-
         .confirmation {
             display: none;
             background-color: rgba(0,0,0,0.8);
@@ -175,10 +132,8 @@
             padding: 20px;
             border-radius: 10px;
             z-index: 1000;
-          
-        }
-
-        /* 弹窗样式 */
+          }
+         /* 弹窗样式 */
         .modal {
             display: none; /* 隐藏弹窗 */
             position: fixed;
@@ -190,22 +145,19 @@
             overflow: auto;
             background-color: rgba(0, 0, 0, 0.4); /* 背景颜色 */
         }
-
-        .modal-content {
+         .modal-content {
             background-color: #fefefe;
             margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
             width: 300px;
         }
-
         .close {
             color: #aaa;
             float: right;
             font-size: 28px;
             font-weight: bold;
         }
-
         .close:hover,
         .close:focus {
             color: black;
@@ -214,37 +166,29 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
         <h2>Material Management System</h2>
-
-        <form id="productForm">
+         <form id="productForm">
             <label for="scanQR">Scan QR Code:</label>
             <input type="text" id="scanQR" placeholder="Scan QR Code here..." oninput="handleQRInput()">
-
             <label for="productID">Product ID (Required):</label>
             <input type="text" id="productID" required>
-
             <label for="productType">Product Type (Required):</label>
             <input type="text" id="productType" required>
-
             <label for="quantity">Quantity (1-50000, Required):</label>
             <input type="number" id="quantity" min="1" max="50000" required>
-
             <label for="productionTime">Production Time (MM/DD/YYYY):</label>
             <input type="text" id="productionTime" placeholder="MM/DD/YYYY">
-
             <label for="username">Username (Optional):</label>
             <input type="text" id="username">
-
-            <label for="location">Location (Optional):</label>
+             <label for="location">Location (Optional):</label>
             <input type="text" id="location">
-
-            <button type="button" onclick="addProduct()">Add Product</button>
+           <button type="button" onclick="addProduct()">Add Product</button>
         </form>
-
-        <div class="product-list">
+          <div class="product-list">
             <table id="productList">
                 <thead>
                     <tr>
@@ -264,17 +208,14 @@
                 </tbody>
             </table>
         </div>
-
-        <button type="button" onclick="deleteSelectedProducts()">Delete Selected Products</button>
+       <button type="button" onclick="deleteSelectedProducts()">Delete Selected Products</button>
     </div>
-
-    <div class="confirmation" id="confirmation">
+       <div class="confirmation" id="confirmation">
         <p>Are you sure you want to proceed?</p>
         <button onclick="confirmAction()">Yes</button>
         <button onclick="cancelAction()">No</button>
     </div>
-
-    <!-- 编辑弹窗 -->
+  <!-- 编辑弹窗 -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeEditModal()">&times;</span>
@@ -294,43 +235,44 @@
             <button type="button" onclick="saveEdit()">Save Changes</button>
         </div>
     </div>
-
-    <script>
+   <div> 
+  <label for="qrText">Generate New CMP QR Code:</label>
+  <input type="text" id="qrText" placeholder="Sample:P311-501705|1PTLV73318PDQNR|1T2470883JCE|7Q3000+EA|S10000000000307579|21PTI|9D20241207|4LCN">
+   <button onclick="generateQRCode()">Submit:</button>
+   </div>
+   <div id="qrCodeContainer" style="margin-top: 20px;"></div>
+   <button id="downloadBtn" style="display:none;" onclick="downloadQRCode()">Download QR Code</button>
+     <body>
+   <script>
         const products = [];
         let selectedProducts = [];
         let currentEditIndex = -1; // 当前编辑的产品索引
-
         function handleQRInput() {
             const qrData = document.getElementById("scanQR").value;
             const parsedData = parseQRCode(qrData);
-
             document.getElementById("productID").value = parsedData.productID;
             document.getElementById("productType").value = parsedData.productType;
             document.getElementById("quantity").value = parsedData.quantity;
             document.getElementById("productionTime").value = parsedData.productionTime;
-
             // Automatically add product when QR code is scanned
             addProduct();
-        }
-
-        function parseQRCode(qrData) {
+        }function parseQRCode(qrData) {
             const parts = qrData.split('|');
             const productType = parts[0].substring(1);
             const productID = parts[4].substring(1);
             const quantity = parts[3].match(/\d{4,5}/)[0];
             const productionTime = formatDate(parts[6].substring(2));
-
             return { productID, productType, quantity, productionTime };
-        }
-
-        function formatDate(dateString) {
-            const year = dateString.substring(0, 4);
-            const month = dateString.substring(4, 6);
-            const day = dateString.substring(6, 8);
-            return `${month}/${day}/${year}`;
-        }
-
-        function addProduct() {
+        }function formatDate(dateString) {
+   if (dateString.length !== 8) {
+       console.error("Invalid date format");
+       return '';
+   }
+   const month = dateString.substring(0, 4);
+   const day = dateString.substring(4, 6);
+   const year = dateString.substring(6, 8);
+   return `${month}/${day}/${year}`;
+        }function addProduct() {
             const productID = document.getElementById("productID").value;
             const productType = document.getElementById("productType").value;
             const quantity = parseInt(document.getElementById("quantity").value, 10);
@@ -343,45 +285,32 @@
             if (!productID || !productType) {
                 alert("Product ID and Product Type are required!");
                 return;
-               }
-               // Prevent quantity exceeding 20000
-
+               } // Prevent quantity exceeding 20000
             if (quantity > 50000) {
-
-                alert("Quantity cannot exceed 50,000. Please enter a valid quantity.");
-
-                return;
-            }
-            // 自动计算过期时间（生产时间加两年）
+             alert("Quantity cannot exceed 50,000. Please enter a valid quantity.");
+               return;
+            }// 自动计算过期时间（生产时间加两年）
             const productionDate = new Date(productionTime);
             const expirationDate = new Date(productionDate.setFullYear(productionDate.getFullYear() + 2));
             const expirationTime = `${expirationDate.getMonth() + 1}/${expirationDate.getDate()}/${expirationDate.getFullYear()}`;
-            
-            products.push({ productID, productType, quantity, expirationTime, username, location, addedDate });
-            updateProductList();
-            
-
-            
-             // Clear input fields after adding product
+             products.push({ productID, productType, quantity, expirationTime, username, location, addedDate });
+             updateProductList();
+            // Clear input fields after adding product
             document.getElementById("scanQR").value = "";
             document.getElementById("productID").value = "";
             document.getElementById("productType").value = "";
             document.getElementById("quantity").value = "";
             document.getElementById("productionTime").value = "";
-            
-        }
-
-        function updateProductList() {
+            }
+            function updateProductList() {
             const tbody = document.querySelector("#productList tbody");
             tbody.innerHTML = ""; // Clear the table body
-
             products.forEach((product, index) => {
                 const row = document.createElement("tr");
                 const now = new Date();
                 const expirationDate = new Date(product.expirationTime);
                 const timeDiff = expirationDate.getTime() - now.getTime();
                 const daysToExpire = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
                 let expirationClass = "";
                 if (daysToExpire < 0) {
                     expirationClass = "expired";
@@ -389,9 +318,7 @@
                     expirationClass = "expiring-soon";
                 } else {
                     expirationClass = "valid";
-                }
-
-                row.innerHTML = `
+                } row.innerHTML = `
                     <td><input type="checkbox" class="multi-select-checkbox" value="${index}"></td>
                     <td>${product.productID}</td>
                     <td>${product.productType}</td>
@@ -405,93 +332,65 @@
                         <button class="delete-btn" onclick="deleteProduct(${index})">Delete</button>
                     </td>
                 `;
-
-                tbody.appendChild(row);
+              tbody.appendChild(row);
             });
-        }
-
-        function deleteProduct(index) {
+        }function deleteProduct(index) {
             if (confirm("Are you sure you want to delete this product?")) {
                 products.splice(index, 1);
                 updateProductList();
             }
-        }
-
-        function editProduct(index) {
+        }function editProduct(index) {
             currentEditIndex = index;
             const product = products[index];
-
-            // Populate modal with product data
+           // Populate modal with product data
             document.getElementById("editProductID").value = product.productID;
             document.getElementById("editProductType").value = product.productType;
             document.getElementById("editQuantity").value = product.quantity;
             document.getElementById("editExpiration").value = product.expirationTime;
-
             document.getElementById("editModal").style.display = "block";
-        }
-
-        function saveEdit() {
+        } function saveEdit() {
             const productType = document.getElementById("editProductType").value;
             const quantity = parseInt(document.getElementById("editQuantity").value, 10);
             const expirationTime = document.getElementById("editExpiration").value;
-
             products[currentEditIndex].productType = productType;
             products[currentEditIndex].quantity = quantity;
             products[currentEditIndex].expirationTime = expirationTime;
-
             closeEditModal();
             updateProductList();
-        }
-
-        function closeEditModal() {
+        }function closeEditModal() {
             document.getElementById("editModal").style.display = "none";
-        }
-
-       function toggleProductSelection(index, checkbox) {
+        }function toggleProductSelection(index, checkbox) {
             if (checkbox.checked) {
                 selectedProducts.push(index);
             } else {
                 selectedProducts = selectedProducts.filter(i => i !== index);
             }
-        }
-
-        function toggleSelectAll(checkbox) {
+        } function toggleSelectAll(checkbox) {
             const checkboxes = document.querySelectorAll('.multi-select-checkbox');
             checkboxes.forEach(cb => {
                 cb.checked = checkbox.checked;
                 toggleProductSelection(cb.getAttribute('data-index'), cb);
             });
-        }
-
-      
-        function confirmDelete(index) {
+        }function confirmDelete(index) {
             selectedProducts = [index]; // Set selected products to the one being deleted
             document.getElementById("confirmation").style.display = "block";
-        }
-
-        function deleteSelectedProducts() {
+        }function deleteSelectedProducts() {
             if (selectedProducts.length === 0) {
                 alert("No products selected!");
                 return;
-            }
-            document.getElementById("confirmation").style.display = "block";
         }
-
-        function confirmAction() {
+            document.getElementById("confirmation").style.display = "block";
+        }function confirmAction() {
             selectedProducts.forEach(index => {
                 products.splice(index, 1);
             });
             selectedProducts = [];
             updateProductList();
             document.getElementById("confirmation").style.display = "none";
-        }
-
-        function cancelAction() {
+        }function cancelAction() {
             selectedProducts = [];
             document.getElementById("confirmation").style.display = "none";
-        }
-
-        function sortTable(colIndex) {
+        }function sortTable(colIndex) {
             products.sort((a, b) => {
                 if (colIndex === 1) return a.productID.localeCompare(b.productID);
                 if (colIndex === 2) return a.productType.localeCompare(b.productType);
@@ -500,6 +399,37 @@
             });
             updateProductList();
         }
+        function generateQRCode() {
+       const qrText = document.getElementById('qrText').value;
+       const qrCodeContainer = document.getElementById('qrCodeContainer');
+       const downloadBtn = document.getElementById('downloadBtn');
+       qrCodeContainer.innerHTML = "";  // 清空之前的二维码
+       if (qrText.trim() !== "") {
+           // 生成二维码
+           QRCode.toCanvas(qrText, { width: 200 }, function (error, canvas) {
+               if (error) {
+                   console.error(error);
+                   return;
+               }
+               qrCodeContainer.appendChild(canvas);
+               downloadBtn.style.display = 'block';  // 显示下载按钮
+           });
+       } else {
+           alert("Please enter text to generate the QR code.");
+           downloadBtn.style.display = 'none';  // 隐藏下载按钮
+       }
+   }
+   function downloadQRCode() {
+       const qrCodeCanvas = document.querySelector('#qrCodeContainer canvas');
+       if (qrCodeCanvas) {
+           const link = document.createElement('a');
+           link.href = qrCodeCanvas.toDataURL('image/png');  // 转为图片
+           link.download = 'qr_code.png';  // 设置下载的文件名
+           link.click();  // 触发下载
+       } else {
+           alert("Please generate a QR code first.");
+       }
+   }
     </script>
 </body>
 </html>
