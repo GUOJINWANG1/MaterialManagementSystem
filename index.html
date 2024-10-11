@@ -244,56 +244,42 @@
    <button id="downloadBtn" style="display:none;" onclick="downloadQRCode()">Download QR Code</button>
      <body>
    <script>
-        const products = [];
+       const products = [];
 let selectedProducts = [];
 let currentEditIndex = -1; // 当前编辑的产品索引
 function handleQRInput(scannedQRCodeData) {
-   const qrData = document.getElementById("scanQR").value;
+   // 使用从二维码扫描的内容，或直接从文本框获取
+   const qrData = scannedQRCodeData || document.getElementById("scanQR").value;
    const parsedData = parseQRCode(qrData);
+   // 自动填充对应的输入框
    document.getElementById("productID").value = parsedData.productID;
    document.getElementById("productType").value = parsedData.productType;
    document.getElementById("quantity").value = parsedData.quantity;
    document.getElementById("productionTime").value = parsedData.productionTime;
-   // 自动添加产品到清单
+   // 自动添加产品
    addProduct();
-   // 去除不可见字符并检查日期格式
-   let sanitizedData = scannedQRCodeData.trim().replace(/[^a-zA-Z0-9\/]/g, '');
-   let datePattern = /^\d{2}\/\d{2}\/\d{4}$/;
-   if (datePattern.test(sanitizedData)) {
-       addToList(sanitizedData); // 添加到清单
-   } else {
-       alert("Invalid date format from QR code");
-   }
-
-function addToList(date) {
-   console.log("Date added to list: " + date);
 }
-// 修改后的二维码解析函数，包含日期处理
 function parseQRCode(qrData) {
+   // 假设二维码格式是 | 分隔的，生产日期部分包含 "9DYYYYMMDD"
    const parts = qrData.split('|');
-   // 获取产品相关数据
-   const productType = parts[0].substring(1); // 产品种类
-   const productID = parts[4].substring(1);   // 产品ID
-   const quantity = parts[3].match(/\d{4,5}/)[0]; // 数量（4到5位数字）
-   // 解析日期部分 (去除 '9D' 并转换为 MM/DD/YYYY 格式)
-   const rawDate = parts[6]; // 假设日期在 parts[6]
-   const productionTime = formatDate(rawDate);
+   // 解析产品信息
+   const productType = parts[0].substring(1); // 假设格式为某种标准
+   const productID = parts[4].substring(1);
+   const quantity = parts[3].match(/\d{4,5}/)[0]; // 匹配4-5位数的数量
+   const productionTime = formatDate(parts[6].substring(2)); // 去除 "9D" 并格式化日期
    return { productID, productType, quantity, productionTime };
 }
-// 修改后的日期格式化函数，支持 9DYYYYMMDD 格式
 function formatDate(dateString) {
-   // 确保日期字符串以 '9D' 开头并且长度足够
-   if (!dateString.startsWith('9D') || dateString.length !== 10) {
+   // 假设 dateString 是 "YYYYMMDD" 格式，去掉 "9D" 后的内容
+   if (dateString.length !== 8) {
        console.error("Invalid date format");
-       return '';
+       return 'Invalid Date';
    }
-   // 去除 '9D'，提取 YYYYMMDD
-   const cleanDate = dateString.substring(2); // 去掉前两个字符 '9D'
-   // 按照 YYYYMMDD 提取年、月、日
-   const year = cleanDate.substring(0, 4);
-   const month = cleanDate.substring(4, 6);
-   const day = cleanDate.substring(6, 8);
-   // 返回 MM/DD/YYYY 格式
+   // 分割年、月、日
+   const year = dateString.substring(0, 4); // 前四位为年份
+   const month = dateString.substring(4, 6); // 中间两位为月份
+   const day = dateString.substring(6, 8); // 最后两位为日期
+   // 返回格式化的日期 MM/DD/YYYY
    return `${month}/${day}/${year}`;
 }
 function addProduct() {
@@ -305,12 +291,10 @@ function addProduct() {
    const location = document.getElementById("location").value;
    const currentDate = new Date();
    const addedDate = `${currentDate.getMonth() + 1}/${currentDate.getDate()}/${currentDate.getFullYear()}`;
-   // 验证产品ID和类型
    if (!productID || !productType) {
        alert("Product ID and Product Type are required!");
        return;
    }
-   // 防止数量超过50000
    if (quantity > 50000) {
        alert("Quantity cannot exceed 50,000. Please enter a valid quantity.");
        return;
@@ -330,7 +314,7 @@ function addProduct() {
 }
 function updateProductList() {
    const tbody = document.querySelector("#productList tbody");
-   tbody.innerHTML = ""; // 清空表格主体
+   tbody.innerHTML = ""; // 清空表格内容
    products.forEach((product, index) => {
        const row = document.createElement("tr");
        const now = new Date();
@@ -361,7 +345,7 @@ function updateProductList() {
        `;
        tbody.appendChild(row);
    });
-}
+
         }function deleteProduct(index) {
             if (confirm("Are you sure you want to delete this product?")) {
                 products.splice(index, 1);
